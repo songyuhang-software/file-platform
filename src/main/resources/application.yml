@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:mysql://sha1.clusters.zeabur.com:31633/file_platform?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 2uLDY518e7tXbGFzih3jA0m9vsWC6r4o
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  redis:
+    host: sha1.clusters.zeabur.com
+    port: 31164
+    password: hNc6l4ieKQZ75bnr2U03At9wSsO18jVB
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+# MyBatis配置
+mybatis:
+  # 扫描mapper文件路径
+  mapper-locations: classpath:mapper/*.xml
+  # 实体类所在包路径
+  type-aliases-package: file.platform.entity
+  configuration:
+    # 开启驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 打印SQL日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

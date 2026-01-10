@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="file.platform.dao.DefaultAvatarMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="DefaultAvatarResultMap" type="file.platform.entity.DefaultAvatar">
+        <id property="id" column="id"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="recommendedGender" column="recommended_gender"/>
+    </resultMap>
+
+    <!-- 插入默认头像 -->
+    <insert id="insert" parameterType="file.platform.entity.DefaultAvatar">
+        INSERT INTO default_avatar (avatar_url, recommended_gender)
+        VALUES (#{defaultAvatar.avatarUrl}, #{defaultAvatar.recommendedGender})
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="map" resultMap="DefaultAvatarResultMap">
+        SELECT id, avatar_url, recommended_gender
+        FROM default_avatar
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据性别和排除ID列表随机查询 -->
+    <select id="selectRandomByGenderAndExcludes" parameterType="map" resultMap="DefaultAvatarResultMap">
+        SELECT id, avatar_url, recommended_gender
+        FROM default_avatar
+        <where>
+            <choose>
+                <when test="gender == null">
+                    <!-- 不指定性别：查询所有 -->
+                    1=1
+                </when>
+                <when test="gender == 0">
+                    <!-- 指定通用：查询通用(0) -->
+                    recommended_gender = 0
+                </when>
+                <when test="gender == 1">
+                    <!-- 指定男性：查询男性(1)和通用(0) -->
+                    recommended_gender IN (0, 1)
+                </when>
+                <when test="gender == 2">
+                    <!-- 指定女性：查询女性(2)和通用(0) -->
+                    recommended_gender IN (0, 2)
+                </when>
+            </choose>
+            <if test="excludeIds != null and excludeIds.size() > 0">
+                AND id NOT IN
+                <foreach collection="excludeIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY RAND()
+        LIMIT 1
+    </select>
+
+    <!-- 根据性别统计数量 -->
+    <select id="countByGender" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM default_avatar
+        <where>
+            <choose>
+                <when test="gender == null">
+                    <!-- 不指定性别：统计所有 -->
+                    1=1
+                </when>
+                <when test="gender == 0">
+                    <!-- 通用：统计通用(0) -->
+                    recommended_gender = 0
+                </when>
+                <when test="gender == 1">
+                    <!-- 男性：统计男性(1)和通用(0) -->
+                    recommended_gender IN (0, 1)
+                </when>
+                <when test="gender == 2">
+                    <!-- 女性：统计女性(2)和通用(0) -->
+                    recommended_gender IN (0, 2)
+                </when>
+            </choose>
+        </where>
+    </select>
+
+</mapper>
