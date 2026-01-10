@@ -13,6 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Service
@@ -25,10 +28,40 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     private static final String DOMAIN = "v0.api.upyun.com";
     private static final String FILE_PATH = "/defaultAvatar";
 
+    // 支持的图片类型
+    private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
+        "jpg", "jpeg", "png", "gif", "bmp", "webp"
+    );
+
     private final OkHttpClient client = new OkHttpClient();
 
     @Override
-    public String uploadFile(File file) {
+    public String uploadImage(File file) {
+        // 验证文件
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("文件不存在");
+        }
+
+        // 验证是否为图片文件
+        String fileName = file.getName().toLowerCase();
+        boolean isImage = false;
+        String extension = "";
+
+        for (String allowedType : ALLOWED_IMAGE_TYPES) {
+            if (fileName.endsWith("." + allowedType)) {
+                isImage = true;
+                extension = allowedType;
+                break;
+            }
+        }
+
+        if (!isImage) {
+            throw new IllegalArgumentException("不支持的文件类型，只允许上传图片文件: " + ALLOWED_IMAGE_TYPES);
+        }
+
+        // 生成唯一文件名 (UUID + 原始扩展名)
+        String uniqueFileName = UUID.randomUUID().toString().replace("-", "") + "." + extension;
+
         try {
             // 生成时间戳
             String date = getGMTDate();
@@ -37,7 +70,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             long fileSize = file.length();
 
             // 构造请求路径
-            String uri = "/" + BUCKET + FILE_PATH;
+            String uri = "/" + BUCKET + FILE_PATH + "/" + uniqueFileName;
             String url = "https://" + DOMAIN + uri;
 
             // 计算密码MD5
@@ -52,13 +85,15 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             String authorization = "UPYUN " + OPERATOR + ":" + signature;
 
             System.out.println("上传参数:");
+            System.out.println("原始文件名: " + fileName);
+            System.out.println("唯一文件名: " + uniqueFileName);
             System.out.println("URL: " + url);
             System.out.println("Date: " + date);
             System.out.println("File Size: " + fileSize);
             System.out.println("Authorization: " + authorization);
 
             // 读取文件
-            RequestBody requestBody = RequestBody.create(file, MediaType.parse("application/octet-stream"));
+            RequestBody requestBody = RequestBody.create(file, MediaType.parse("image/" + extension));
 
             // 构造请求
             Request request = new Request.Builder()
@@ -67,7 +102,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
                     .addHeader("Authorization", authorization)
                     .addHeader("Date", date)
                     .addHeader("Content-Length", String.valueOf(fileSize))
-                    .addHeader("Content-Type", "application/octet-stream")
+                    .addHeader("Content-Type", "image/" + extension)
                     .build();
 
             // 发送请求
@@ -76,20 +111,19 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
                     String responseBody = response.body() != null ? response.body().string() : "";
                     System.out.println("上传成功: " + responseBody);
 
-                    // 从响应中解析URL
-                    String fileUrl = parseUrlFromResponse(responseBody);
-                    return fileUrl;
+                    // 返回完整的上传文件URL
+                    return "https://" + BUCKET + ".b0.aicdn.com" + FILE_PATH + "/" + uniqueFileName;
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "";
                     System.err.println("上传失败: " + response.code() + " - " + errorBody);
-                    throw new RuntimeException("文件上传失败: " + response.code() + " - " + errorBody);
+                    throw new RuntimeException("图片上传失败: " + response.code() + " - " + errorBody);
                 }
             }
 
         } catch (Exception e) {
             System.err.println("上传异常: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("文件上传异常", e);
+            throw new RuntimeException("图片上传异常", e);
         }
     }
 
@@ -147,7 +181,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             // 生成时间戳
             String date = getGMTDate();
 
-            // 构造请求路径
+            // 构造请求路径 - fileName只包含文件名，不包含路径
             String uri = "/" + BUCKET + FILE_PATH + "/" + fileName;
             String url = "https://" + DOMAIN + uri;
 
@@ -163,6 +197,8 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             String authorization = "UPYUN " + OPERATOR + ":" + signature;
 
             System.out.println("删除参数:");
+            System.out.println("文件名: " + fileName);
+            System.out.println("完整路径: " + uri);
             System.out.println("URL: " + url);
             System.out.println("Date: " + date);
             System.out.println("Authorization: " + authorization);
@@ -195,6 +231,10 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         }
     }
 }
+
+
+
+
 
 
 

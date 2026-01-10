@@ -32,7 +32,7 @@ public class AvatarServiceImpl implements AvatarService {
             File file = tempFile.toFile();
 
             // 上传文件并获取URL
-            String avatarUrl = fileHostingService.uploadFile(file);
+            String avatarUrl = fileHostingService.uploadImage(file);
 
             // 保存到数据库
             DefaultAvatar defaultAvatar = new DefaultAvatar(avatarUrl, recommendedGender);

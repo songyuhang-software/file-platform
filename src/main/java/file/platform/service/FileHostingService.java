@@ -4,9 +4,10 @@ import java.io.File;
 
 public interface FileHostingService {
 
-    String uploadFile(File file);
+    String uploadImage(File file);
 
     boolean deleteFile(String fileName);
 
 }
+
 
