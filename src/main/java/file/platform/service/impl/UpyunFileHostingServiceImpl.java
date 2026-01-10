@@ -25,7 +25,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     private static final String BUCKET = "agent69-image";
     private static final String OPERATOR = "songyuhang";
     private static final String PASSWORD = "DCbg9f9MT2NrT9TlBIWKxNAT3dhyAX32";
-    private static final String DOMAIN = "v0.api.upyun.com";
+    private static final String DOMAIN = "https://v0.api.upyun.com/";
     private static final String FILE_PATH = "/defaultAvatar";
 
     // 支持的图片类型
@@ -70,8 +70,8 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             long fileSize = file.length();
 
             // 构造请求路径
-            String uri = "/" + BUCKET + FILE_PATH + "/" + uniqueFileName;
-            String url = "https://" + DOMAIN + uri;
+            String uri = BUCKET + FILE_PATH + "/" + uniqueFileName;
+            String url =  DOMAIN + uri;
 
             // 计算密码MD5
             String passwordMd5 = md5(PASSWORD);
@@ -183,7 +183,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             // 构造请求路径 - fileName只包含文件名，不包含路径
 
-            String url = "https://" + DOMAIN + fileName;
+            String url = DOMAIN + fileName;
 
             // 计算密码MD5
             String passwordMd5 = md5(PASSWORD);
