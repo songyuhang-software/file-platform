@@ -49,7 +49,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             String signature = md5(signatureString);
 
             // 构造Authorization头
-            String authorization = "UPYUN " + BUCKET + ":" + OPERATOR + ":" + signature;
+            String authorization = "UPYUN " + OPERATOR + ":" + signature;
 
             System.out.println("上传参数:");
             System.out.println("URL: " + url);
