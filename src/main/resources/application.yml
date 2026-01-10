@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB    # 单个文件最大 50MB
+      max-request-size: 100MB # 整个请求最大 100MB
   datasource:
     url: jdbc:mysql://sha1.clusters.zeabur.com:31633/file_platform?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
