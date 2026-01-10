@@ -25,6 +25,8 @@ public class AvatarServiceImpl implements AvatarService {
     @Autowired
     private DefaultAvatarMapper defaultAvatarMapper;
 
+    private static final String upyunDomain = "http://agent69-image.test.upcdn.net/";
+
     @Override
     public String uploadDefaultAvatar(byte[] imageBytes, Integer recommendedGender) {
         // 创建临时文件
@@ -84,7 +86,7 @@ public class AvatarServiceImpl implements AvatarService {
         List<DefaultAvatar> result = defaultAvatarMapper.selectRandomByGenderAndExcludes(genderValue, excludeIds);
 
         if (result != null && !result.isEmpty()) {
-            return result.get(0).getAvatarUrl();
+            return upyunDomain + result.get(0).getAvatarUrl();
         }
 
         return null; // 没有找到符合条件的结果
