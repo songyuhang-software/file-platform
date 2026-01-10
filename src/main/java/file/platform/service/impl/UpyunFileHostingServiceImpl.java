@@ -80,7 +80,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             // 计算签名
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "PUT&" + uri + "&" + date;
+            String signatureString = "PUT&" + uri + "&" + date + "&";
 
             // 对signatureString做HMAC-SHA1，密钥用passwordMd5
             String signature = hmacSha1(signatureString, passwordMd5);
