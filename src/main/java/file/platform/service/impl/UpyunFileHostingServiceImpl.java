@@ -87,7 +87,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
 
             // 构造Authorization头
-            String authorization = "UPYUN " + OPERATOR + ":" + signature;
+            String authorization = "UPYUN " + OPERATOR + ":" + md5(signature);
 
             System.out.println("上传参数:");
             System.out.println("原始文件名: " + fileName);
