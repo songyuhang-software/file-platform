@@ -182,8 +182,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             String date = getGMTDate();
 
             // 构造请求路径 - fileName只包含文件名，不包含路径
-
-            String url = DOMAIN + fileName;
+            String url = DOMAIN + BUCKET + "/" + fileName;
 
             // 计算密码MD5
             String passwordMd5 = md5(PASSWORD);
