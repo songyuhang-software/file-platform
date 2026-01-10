@@ -189,7 +189,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             // 计算签名（DELETE方法）
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "DELETE&" + fileName + "&" + date + "&0&" + passwordMd5;
+            String signatureString = "DELETE&" + BUCKET + "/" + fileName + "&" + date + "&0&" + passwordMd5;
             String signature = md5(signatureString);
 
             // 构造Authorization头
