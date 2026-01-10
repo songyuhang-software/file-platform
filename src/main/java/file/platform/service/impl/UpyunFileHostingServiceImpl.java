@@ -182,15 +182,15 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             String date = getGMTDate();
 
             // 构造请求路径 - fileName只包含文件名，不包含路径
-            String uri = "/" + BUCKET + FILE_PATH + "/" + fileName;
-            String url = "https://" + DOMAIN + uri;
+
+            String url = "https://" + DOMAIN + fileName;
 
             // 计算密码MD5
             String passwordMd5 = md5(PASSWORD);
 
             // 计算签名（DELETE方法）
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "DELETE&" + uri + "&" + date + "&0&" + passwordMd5;
+            String signatureString = "DELETE&" + fileName + "&" + date + "&0&" + passwordMd5;
             String signature = md5(signatureString);
 
             // 构造Authorization头
@@ -198,7 +198,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             System.out.println("删除参数:");
             System.out.println("文件名: " + fileName);
-            System.out.println("完整路径: " + uri);
+            System.out.println("完整路径: " + fileName);
             System.out.println("URL: " + url);
             System.out.println("Date: " + date);
             System.out.println("Authorization: " + authorization);
