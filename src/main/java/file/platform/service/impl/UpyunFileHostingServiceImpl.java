@@ -16,6 +16,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.Arrays;
 import java.util.List;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 
 @Service
@@ -78,8 +80,11 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             // 计算签名
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "PUT&" + uri + "&" + date + "&" + fileSize + "&" + passwordMd5;
-            String signature = md5(signatureString);
+            String signatureString = "PUT&" + uri + "&" + date;
+
+            // 对signatureString做HMAC-SHA1，密钥用passwordMd5
+            String signature = hmacSha1(signatureString, passwordMd5);
+
 
             // 构造Authorization头
             String authorization = "UPYUN " + OPERATOR + ":" + signature;
@@ -154,6 +159,27 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     }
 
     /**
+     * HMAC-SHA1签名
+     */
+    private String hmacSha1(String data, String key) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA1");
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA1");
+            mac.init(secretKey);
+            byte[] hmacBytes = mac.doFinal(data.getBytes("UTF-8"));
+
+            // 转换为十六进制字符串
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hmacBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("HMAC-SHA1计算失败", e);
+        }
+    }
+
+    /**
      * 从又拍云API响应中解析URL
      */
     private String parseUrlFromResponse(String responseBody) {
@@ -190,7 +216,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             // 计算签名（DELETE方法）
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
             String signatureString = "DELETE&" + BUCKET + "/" + fileName + "&" + date + "&0&" + passwordMd5;
-            String signature = md5(signatureString);
+            String signature = hmacSha1(signatureString, passwordMd5);
 
             // 构造Authorization头
             String authorization = "UPYUN " + OPERATOR + ":" + signature;
@@ -230,6 +256,10 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         }
     }
 }
+
+
+
+
 
 
 
