@@ -16,6 +16,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -80,14 +81,14 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
             // 计算签名
             // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "PUT&" + uri + "&" + date + "&";
+            String signatureString = "PUT&" + uri + "&" + date ;
 
             // 对signatureString做HMAC-SHA1，密钥用passwordMd5
             String signature = hmacSha1(signatureString, passwordMd5);
 
 
             // 构造Authorization头
-            String authorization = "UPYUN " + OPERATOR + ":" + md5(signature);
+            String authorization = "UPYUN " + OPERATOR + ":" + base64(signature);
 
             System.out.println("上传参数:");
             System.out.println("原始文件名: " + fileName);
@@ -180,6 +181,18 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     }
 
     /**
+     * Base64编码
+     */
+    private String base64(String input) {
+        try {
+            byte[] bytes = input.getBytes("UTF-8");
+            return Base64.getEncoder().encodeToString(bytes);
+        } catch (Exception e) {
+            throw new RuntimeException("Base64编码失败", e);
+        }
+    }
+
+    /**
      * 从又拍云API响应中解析URL
      */
     private String parseUrlFromResponse(String responseBody) {
@@ -256,6 +269,8 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         }
     }
 }
+
+
 
 
 
