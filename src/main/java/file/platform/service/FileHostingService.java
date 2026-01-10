@@ -6,4 +6,7 @@ public interface FileHostingService {
 
     String uploadFile(File file);
 
+    boolean deleteFile(String fileName);
+
 }
+

@@ -1,11 +1,9 @@
 package file.platform.controller;
 
+import file.platform.service.FileHostingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
 
 /**
  * 文件服务REST控制器
@@ -16,16 +14,25 @@ import java.util.*;
 @CrossOrigin(origins = "*")
 public class FileController {
 
-    private static final String UPLOAD_DIR = "uploads/";
+    @Autowired
+    private FileHostingService fileHostingService;
 
-    // 初始化上传目录
-    public FileController() {
+    /**
+     * 删除文件
+     * @param fileName 要删除的文件名
+     * @return 删除结果
+     */
+    @DeleteMapping
+    public ResponseEntity<String> deleteFile(@RequestParam String fileName) {
         try {
-            Files.createDirectories(Paths.get(UPLOAD_DIR));
-        } catch (IOException e) {
-            e.printStackTrace();
+            boolean success = fileHostingService.deleteFile(fileName);
+            if (success) {
+                return ResponseEntity.ok("文件删除成功: " + fileName);
+            } else {
+                return ResponseEntity.status(500).body("文件删除失败: " + fileName);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("删除文件时发生异常: " + e.getMessage());
         }
     }
-
-
 }

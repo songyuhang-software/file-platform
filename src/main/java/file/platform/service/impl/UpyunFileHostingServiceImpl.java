@@ -140,7 +140,62 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
             return "https://" + BUCKET + ".b0.aicdn.com" + FILE_PATH;
         }
     }
+
+    @Override
+    public boolean deleteFile(String fileName) {
+        try {
+            // 生成时间戳
+            String date = getGMTDate();
+
+            // 构造请求路径
+            String uri = "/" + BUCKET + FILE_PATH + "/" + fileName;
+            String url = "https://" + DOMAIN + uri;
+
+            // 计算密码MD5
+            String passwordMd5 = md5(PASSWORD);
+
+            // 计算签名（DELETE方法）
+            // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
+            String signatureString = "DELETE&" + uri + "&" + date + "&0&" + passwordMd5;
+            String signature = md5(signatureString);
+
+            // 构造Authorization头
+            String authorization = "UPYUN " + OPERATOR + ":" + signature;
+
+            System.out.println("删除参数:");
+            System.out.println("URL: " + url);
+            System.out.println("Date: " + date);
+            System.out.println("Authorization: " + authorization);
+
+            // 构造DELETE请求
+            Request request = new Request.Builder()
+                    .url(url)
+                    .delete()
+                    .addHeader("Authorization", authorization)
+                    .addHeader("Date", date)
+                    .addHeader("Content-Length", "0")
+                    .build();
+
+            // 发送请求
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    System.out.println("文件删除成功: " + fileName);
+                    return true;
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    System.err.println("删除失败: " + response.code() + " - " + errorBody);
+                    return false;
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("删除异常: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
+
 
 
 
