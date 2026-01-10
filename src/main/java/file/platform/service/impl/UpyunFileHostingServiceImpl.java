@@ -1,24 +1,19 @@
 package file.platform.service.impl;
 
+import com.upyun.FormUploader;
+import com.upyun.Result;
 import file.platform.service.FileHostingService;
 import okhttp3.*;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Base64;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.*;
 
 
 @Service
@@ -39,7 +34,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     private final OkHttpClient client = new OkHttpClient();
 
     @Override
-    public String uploadImage(File file) {
+    public String uploadImage(File file) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         // 验证文件
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("文件不存在");
@@ -64,73 +59,14 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
         // 生成唯一文件名 (UUID + 原始扩展名)
         String uniqueFileName = UUID.randomUUID().toString().replace("-", "") + "." + extension;
+        String savePath = FILE_PATH + "/" + uniqueFileName;
 
-        try {
-            // 生成时间戳
-            String date = getGMTDate();
-
-            // 计算文件大小
-            long fileSize = file.length();
-
-            // 构造请求路径
-            String uri = BUCKET + FILE_PATH + "/" + uniqueFileName;
-            String url =  DOMAIN + uri;
-
-            // 计算密码MD5
-            String passwordMd5 = md5(PASSWORD);
-
-            // 计算签名
-            // signature = md5(method + '&' + uri + '&' + date + '&' + content_length + '&' + md5(password))
-            String signatureString = "PUT&" + uri + "&" + date + "&";
-
-            // 对signatureString做HMAC-SHA1，密钥用passwordMd5
-            String signature = hmacSha1(signatureString, passwordMd5);
-
-
-            // 构造Authorization头
-            String authorization = "UPYUN " + OPERATOR + ":" + base64(signature);
-
-            System.out.println("上传参数:");
-            System.out.println("原始文件名: " + fileName);
-            System.out.println("唯一文件名: " + uniqueFileName);
-            System.out.println("URL: " + url);
-            System.out.println("Date: " + date);
-            System.out.println("File Size: " + fileSize);
-            System.out.println("Authorization: " + authorization);
-
-            // 读取文件
-            RequestBody requestBody = RequestBody.create(file, MediaType.parse("image/" + extension));
-
-            // 构造请求
-            Request request = new Request.Builder()
-                    .url(url)
-                    .put(requestBody)
-                    .addHeader("Authorization", authorization)
-                    .addHeader("Date", date)
-                    .addHeader("Content-Length", String.valueOf(fileSize))
-                    .addHeader("Content-Type", "image/" + extension)
-                    .build();
-
-            // 发送请求
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body() != null ? response.body().string() : "";
-                    System.out.println("上传成功: " + responseBody);
-
-                    // 返回完整的上传文件URL
-                    return "https://" + BUCKET + ".b0.aicdn.com" + FILE_PATH + "/" + uniqueFileName;
-                } else {
-                    String errorBody = response.body() != null ? response.body().string() : "";
-                    System.err.println("上传失败: " + response.code() + " - " + errorBody);
-                    throw new RuntimeException("图片上传失败: " + response.code() + " - " + errorBody);
-                }
-            }
-
-        } catch (Exception e) {
-            System.err.println("上传异常: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("图片上传异常", e);
-        }
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("save-key", savePath);
+        FormUploader uploader = new FormUploader(BUCKET, OPERATOR, PASSWORD);
+        Result result = uploader.upload(paramsMap, file);
+        System.out.println(result);
+        return JSONObject.toJSONString(result);
     }
 
     /**
@@ -159,38 +95,7 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         }
     }
 
-    /**
-     * HMAC-SHA1签名
-     */
-    private String hmacSha1(String data, String key) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA1");
-            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA1");
-            mac.init(secretKey);
-            byte[] hmacBytes = mac.doFinal(data.getBytes("UTF-8"));
 
-            // 转换为十六进制字符串
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hmacBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("HMAC-SHA1计算失败", e);
-        }
-    }
-
-    /**
-     * Base64编码
-     */
-    private String base64(String input) {
-        try {
-            byte[] bytes = input.getBytes("UTF-8");
-            return Base64.getEncoder().encodeToString(bytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Base64编码失败", e);
-        }
-    }
 
     /**
      * 从又拍云API响应中解析URL
