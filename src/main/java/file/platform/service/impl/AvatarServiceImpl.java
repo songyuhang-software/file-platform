@@ -6,6 +6,7 @@ import file.platform.service.AvatarService;
 import file.platform.service.FileHostingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -60,7 +62,7 @@ public class AvatarServiceImpl implements AvatarService {
     }
 
     @Override
-    public String getRandomAvatar(String gender, List<Long> excludeIds) {
+    public DefaultAvatar getRandomAvatar(String gender, List<Long> excludeIds) {
         // 将gender字符串转换为数字
         Integer genderValue = null;
         if ("male".equalsIgnoreCase(gender)) {
@@ -79,14 +81,17 @@ public class AvatarServiceImpl implements AvatarService {
 
         // 如果排除了所有记录，返回null
         if (excludeIds != null && excludeIds.size() >= availableCount) {
-            return "已经是最后一张啦";
+            return null;
         }
 
         // 随机查询一条记录
         List<DefaultAvatar> result = defaultAvatarMapper.selectRandomByGenderAndExcludes(genderValue, excludeIds);
 
         if (result != null && !result.isEmpty()) {
-            return upyunDomain + result.get(0).getAvatarUrl();
+            Collections.shuffle(result);
+            DefaultAvatar defaultAvatar = result.get(0);
+            defaultAvatar.setAvatarUrl(upyunDomain + defaultAvatar.getAvatarUrl());
+            return defaultAvatar;
         }
 
         return null; // 没有找到符合条件的结果

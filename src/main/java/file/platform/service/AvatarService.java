@@ -1,12 +1,14 @@
 package file.platform.service;
 
+import file.platform.entity.DefaultAvatar;
+
 import java.util.List;
 
 public interface AvatarService {
 
     String uploadDefaultAvatar(byte[] imageBytes, Integer recommendedGender);
 
-    String getRandomAvatar(String gender, List<Long> excludeIds);
+    DefaultAvatar getRandomAvatar(String gender, List<Long> excludeIds);
 
 }
 

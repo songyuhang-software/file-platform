@@ -1,5 +1,6 @@
 package file.platform.controller;
 
+import file.platform.entity.DefaultAvatar;
 import file.platform.service.AvatarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -118,22 +119,18 @@ public class ImageController {
             }
 
             // 调用AvatarService获取随机头像
-            String avatarUrl = avatarService.getRandomAvatar(gender, excludeIdList);
+            DefaultAvatar avatar = avatarService.getRandomAvatar(gender, excludeIdList);
 
-            if (avatarUrl == null) {
+            if (avatar == null) {
                 result.put("success", false);
-                result.put("message", "没有找到可用的头像");
+                result.put("message", "已经是最后一张啦");
                 return ResponseEntity.ok(result);
             }
 
-            if ("已经是最后一张啦".equals(avatarUrl)) {
-                result.put("success", false);
-                result.put("message", avatarUrl);
-                return ResponseEntity.ok(result);
-            }
 
             result.put("success", true);
-            result.put("avatarUrl", avatarUrl);
+            result.put("avatarUrl", avatar.getAvatarUrl());
+            result.put("avatarId", avatar.getId());
             result.put("message", "获取随机头像成功");
 
             return ResponseEntity.ok(result);
