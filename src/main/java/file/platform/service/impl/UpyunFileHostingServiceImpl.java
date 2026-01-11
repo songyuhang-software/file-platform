@@ -28,8 +28,8 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     private static final String BUCKET = "agent69-image";
     private static final String OPERATOR = "songyuhang";
     private static final String PASSWORD = "DCbg9f9MT2NrT9TlBIWKxNAT3dhyAX32";
-    private static final String DOMAIN = "https://v0.api.upyun.com/";
-    private static final String FILE_PATH = "/defaultAvatar";
+    private static final String DOMAIN = "http://agent69-image.test.upcdn.net/";
+    private static final String FILE_PATH = "defaultAvatar";
 
     // 支持的图片类型
     private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
