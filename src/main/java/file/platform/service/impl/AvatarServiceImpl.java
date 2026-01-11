@@ -6,7 +6,6 @@ import file.platform.service.AvatarService;
 import file.platform.service.FileHostingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +25,6 @@ public class AvatarServiceImpl implements AvatarService {
 
     @Autowired
     private DefaultAvatarMapper defaultAvatarMapper;
-
-    private static final String upyunDomain = "http://agent69-image.test.upcdn.net/";
 
     @Override
     public String uploadDefaultAvatar(byte[] imageBytes, Integer recommendedGender) {
@@ -90,7 +87,7 @@ public class AvatarServiceImpl implements AvatarService {
         if (result != null && !result.isEmpty()) {
             Collections.shuffle(result);
             DefaultAvatar defaultAvatar = result.get(0);
-            defaultAvatar.setAvatarUrl(upyunDomain + defaultAvatar.getAvatarUrl());
+            defaultAvatar.setAvatarUrl(fileHostingService.getDomain() + defaultAvatar.getAvatarUrl());
             return defaultAvatar;
         }
 

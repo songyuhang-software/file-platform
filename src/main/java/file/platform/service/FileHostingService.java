@@ -14,6 +14,8 @@ public interface FileHostingService {
 
     boolean deleteFile(String fileName) throws UpException, IOException;
 
+    String getDomain();
+
 }
 
 

@@ -22,6 +22,13 @@
         WHERE id = #{id}
     </select>
 
+    <!-- 根据avatarUrl查询 -->
+    <select id="selectByAvatarUrl" parameterType="map" resultMap="DefaultAvatarResultMap">
+        SELECT id, avatar_url, recommended_gender
+        FROM default_avatar
+        WHERE avatar_url = #{avatarUrl}
+    </select>
+
     <!-- 根据性别和排除ID列表随机查询 -->
     <select id="selectRandomByGenderAndExcludes" parameterType="map" resultMap="DefaultAvatarResultMap">
         SELECT id, avatar_url, recommended_gender

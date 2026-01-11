@@ -4,15 +4,17 @@ import com.UpYun;
 import com.upyun.FormUploader;
 import com.upyun.Result;
 import com.upyun.UpException;
+import file.platform.dao.DefaultAvatarMapper;
+import file.platform.entity.DefaultAvatar;
 import file.platform.service.FileHostingService;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.text.SimpleDateFormat;
@@ -35,6 +37,9 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
     );
 
     private final OkHttpClient client = new OkHttpClient();
+
+    @Autowired
+    private DefaultAvatarMapper defaultAvatarMapper;
 
     @Override
     public String uploadImage(File file) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -83,9 +88,21 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
 
     @Override
     public boolean deleteFile(String fileName) throws UpException, IOException {
+
+        DefaultAvatar defaultAvatar = defaultAvatarMapper.selectByAvatarUrl(fileName);
+
+        if (Objects.nonNull(defaultAvatar)) {
+            return false;
+        }
+
         UpYun upyun = new UpYun(BUCKET, OPERATOR, PASSWORD);
         String filePath = "/" + fileName;
         return upyun.deleteFile(filePath, null);
+    }
+
+    @Override
+    public String getDomain() {
+        return DOMAIN;
     }
 }
 

@@ -13,9 +13,12 @@ public interface DefaultAvatarMapper {
 
     DefaultAvatar selectById(@Param("id") Long id);
 
+    DefaultAvatar selectByAvatarUrl(@Param("avatarUrl") String avatarUrl);
+
     List<DefaultAvatar> selectRandomByGenderAndExcludes(
             @Param("gender") Integer gender,
             @Param("excludeIds") List<Long> excludeIds);
 
     int countByGender(@Param("gender") Integer gender);
+
 }
