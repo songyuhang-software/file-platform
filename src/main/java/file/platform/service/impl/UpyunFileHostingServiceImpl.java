@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -36,7 +35,6 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         "jpg", "jpeg", "png", "gif", "bmp", "webp"
     );
 
-    private final OkHttpClient client = new OkHttpClient();
 
     @Autowired
     private DefaultAvatarMapper defaultAvatarMapper;
