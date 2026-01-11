@@ -77,15 +77,6 @@ public class UpyunFileHostingServiceImpl implements FileHostingService {
         return msgJson.getString("url");
     }
 
-    /**
-     * 生成GMT格式的时间戳
-     */
-    private String getGMTDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return sdf.format(new Date());
-    }
-
     @Override
     public boolean deleteFile(String fileName) throws UpException, IOException {
 
