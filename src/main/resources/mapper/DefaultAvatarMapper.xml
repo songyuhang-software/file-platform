@@ -89,4 +89,11 @@
         </where>
     </select>
 
+    <!-- 查询所有默认头像 -->
+    <select id="selectAll" resultMap="DefaultAvatarResultMap">
+        SELECT id, avatar_url, recommended_gender
+        FROM default_avatar
+        ORDER BY id
+    </select>
+
 </mapper>

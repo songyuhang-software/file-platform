@@ -93,7 +93,21 @@ public class AvatarServiceImpl implements AvatarService {
 
         return null; // 没有找到符合条件的结果
     }
+
+    @Override
+    public List<DefaultAvatar> getAllAvatars() {
+        List<DefaultAvatar> avatars = defaultAvatarMapper.selectAll();
+        if (avatars != null) {
+            // 为每个头像添加完整域名
+            String domain = fileHostingService.getDomain();
+            for (DefaultAvatar avatar : avatars) {
+                avatar.setAvatarUrl(domain + avatar.getAvatarUrl());
+            }
+        }
+        return avatars;
+    }
 }
+
 
 
 

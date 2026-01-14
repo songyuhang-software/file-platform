@@ -21,4 +21,6 @@ public interface DefaultAvatarMapper {
 
     int countByGender(@Param("gender") Integer gender);
 
+    List<DefaultAvatar> selectAll();
+
 }

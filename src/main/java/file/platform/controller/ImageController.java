@@ -145,6 +145,34 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
+
+    /**
+     * 获取所有默认头像列表
+     * @return 所有默认头像的列表
+     */
+    @GetMapping("/getAllAvatars")
+    public ResponseEntity<Map<String, Object>> getAllAvatars() {
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 调用AvatarService获取所有头像
+            List<DefaultAvatar> avatars = avatarService.getAllAvatars();
+
+            result.put("success", true);
+            result.put("message", "获取所有默认头像成功");
+            result.put("data", avatars);
+            result.put("total", avatars != null ? avatars.size() : 0);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "获取所有默认头像失败：" + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
 }
+
 
 

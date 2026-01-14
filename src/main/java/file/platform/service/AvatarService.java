@@ -10,7 +10,10 @@ public interface AvatarService {
 
     DefaultAvatar getRandomAvatar(String gender, List<Long> excludeIds);
 
+    List<DefaultAvatar> getAllAvatars();
+
 }
+
 
 
 
