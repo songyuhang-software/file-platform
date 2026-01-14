@@ -35,9 +35,12 @@ public class AvatarController {
 
         Map<String, Object> result = new HashMap<>();
 
+        System.out.println("查询开始");
         try {
             // 调用AvatarService获取所有头像
             List<DefaultAvatar> avatars = avatarService.getAllAvatars();
+
+            System.out.println("数据库读取完");
 
             result.put("success", true);
             result.put("message", "获取所有默认头像成功");
