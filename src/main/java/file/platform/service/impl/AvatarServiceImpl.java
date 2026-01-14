@@ -96,15 +96,8 @@ public class AvatarServiceImpl implements AvatarService {
 
     @Override
     public List<DefaultAvatar> getAllAvatars() {
-        List<DefaultAvatar> avatars = defaultAvatarMapper.selectAll();
-        if (avatars != null) {
-            // 为每个头像添加完整域名
-            String domain = fileHostingService.getDomain();
-            for (DefaultAvatar avatar : avatars) {
-                avatar.setAvatarUrl(domain + avatar.getAvatarUrl());
-            }
-        }
-        return avatars;
+
+        return defaultAvatarMapper.selectAll();
     }
 }
 
